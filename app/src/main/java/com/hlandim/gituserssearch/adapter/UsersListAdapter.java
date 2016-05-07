@@ -80,4 +80,8 @@ public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.User
             img_avatar = (ImageView) itemView.findViewById(R.id.img_avatar);
         }
     }
+
+    public List<User> getList() {
+        return list;
+    }
 }

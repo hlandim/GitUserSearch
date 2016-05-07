@@ -1,6 +1,7 @@
 package com.hlandim.gituserssearch.fragment;
 
-import android.graphics.Bitmap;
+import android.content.Context;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -10,13 +11,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.facebook.share.model.ShareLinkContent;
+import com.facebook.share.widget.ShareDialog;
 import com.hlandim.gituserssearch.R;
 import com.hlandim.gituserssearch.adapter.UsersListAdapter;
 import com.hlandim.gituserssearch.controller.SearchController;
 import com.hlandim.gituserssearch.model.User;
+import com.hlandim.gituserssearch.util.recycleview.RecyclerViewClickListener;
+import com.hlandim.gituserssearch.util.recycleview.RecyclerViewTouchListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,6 +65,30 @@ public class SearchFragment extends BaseFragment {
             usersListAdapter = new UsersListAdapter(new ArrayList<User>());
         }
         rv_users.setAdapter(usersListAdapter);
+        final Context applicationContext = getActivity().getApplicationContext();
+        rv_users.addOnItemTouchListener(new RecyclerViewTouchListener(applicationContext, rv_users, new RecyclerViewClickListener() {
+            @Override
+            public void onClick(View view, int position) {
+                // Toast.makeText(applicationContext, usersListAdapter.getList().get(position).getLogin() + " is clicked!", Toast.LENGTH_SHORT).show();
+                User user = usersListAdapter.getList().get(position);
+                ShareLinkContent content = new ShareLinkContent.Builder()
+                        .setContentUrl(Uri.parse(user.getUrl()))
+                        .setImageUrl(Uri.parse(user.getAvatar_url()))
+                        .setContentTitle(user.getLogin())
+                        .setContentDescription(getActivity().getString(R.string.facebook_share_description))
+                        .build();
+
+                ShareDialog shareDialog = new ShareDialog(getActivity());
+                shareDialog.show(content, ShareDialog.Mode.AUTOMATIC);
+
+            }
+
+            @Override
+            public void onLongClick(View view, int position) {
+                //Toast.makeText(applicationContext, usersListAdapter.getList().get(position).getLogin() +" is long pressed!", Toast.LENGTH_SHORT).show();
+
+            }
+        }));
     }
 
     @Override
