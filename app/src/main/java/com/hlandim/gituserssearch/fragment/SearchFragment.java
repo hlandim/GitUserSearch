@@ -21,8 +21,6 @@ import com.hlandim.gituserssearch.R;
 import com.hlandim.gituserssearch.adapter.UsersListAdapter;
 import com.hlandim.gituserssearch.controller.SearchController;
 import com.hlandim.gituserssearch.model.User;
-import com.hlandim.gituserssearch.util.recycleview.RecyclerViewClickListener;
-import com.hlandim.gituserssearch.util.recycleview.RecyclerViewTouchListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +28,7 @@ import java.util.List;
 /**
  * Created by hlandim on 5/7/16.
  */
-public class SearchFragment extends BaseFragment {
+public class SearchFragment extends BaseFragment implements UsersListAdapter.UserListListener {
 
     private SearchController controller;
     private EditText edt_search;
@@ -69,29 +67,30 @@ public class SearchFragment extends BaseFragment {
         }
         rv_users.setAdapter(usersListAdapter);
         final Context applicationContext = getActivity().getApplicationContext();
-        rv_users.addOnItemTouchListener(new RecyclerViewTouchListener(applicationContext, rv_users, new RecyclerViewClickListener() {
-            @Override
-            public void onClick(View view, int position) {
-                // Toast.makeText(applicationContext, usersListAdapter.getList().get(position).getLogin() + " is clicked!", Toast.LENGTH_SHORT).show();
-                User user = usersListAdapter.getList().get(position);
-                ShareLinkContent content = new ShareLinkContent.Builder()
-                        .setContentUrl(Uri.parse(user.getUrl()))
-                        .setImageUrl(Uri.parse(user.getAvatar_url()))
-                        .setContentTitle(user.getLogin())
-                        .setContentDescription(getActivity().getString(R.string.facebook_share_description))
-                        .build();
-
-                ShareDialog shareDialog = new ShareDialog(getActivity());
-                shareDialog.show(content, ShareDialog.Mode.AUTOMATIC);
-
-            }
-
-            @Override
-            public void onLongClick(View view, int position) {
-                //Toast.makeText(applicationContext, usersListAdapter.getList().get(position).getLogin() +" is long pressed!", Toast.LENGTH_SHORT).show();
-
-            }
-        }));
+//        rv_users.addOnItemTouchListener(new RecyclerViewTouchListener(applicationContext, rv_users, new RecyclerViewClickListener() {
+//            @Override
+//            public void onClick(View view, int position) {
+//                // Toast.makeText(applicationContext, usersListAdapter.getList().get(position).getLogin() + " is clicked!", Toast.LENGTH_SHORT).show();
+//                User user = usersListAdapter.getList().get(position);
+//                ShareLinkContent content = new ShareLinkContent.Builder()
+//                        .setContentUrl(Uri.parse(user.getUrl()))
+//                        .setImageUrl(Uri.parse(user.getAvatar_url()))
+//                        .setContentTitle(user.getLogin())
+//                        .setContentDescription(getActivity().getString(R.string.facebook_share_description))
+//                        .build();
+//
+//                ShareDialog shareDialog = new ShareDialog(getActivity());
+//                shareDialog.show(content, ShareDialog.Mode.AUTOMATIC);
+//
+//            }
+//
+//            @Override
+//            public void onLongClick(View view, int position) {
+//                //Toast.makeText(applicationContext, usersListAdapter.getList().get(position).getLogin() +" is long pressed!", Toast.LENGTH_SHORT).show();
+//
+//            }
+//        }));
+        usersListAdapter.setListener(this);
     }
 
     @Override
@@ -112,9 +111,17 @@ public class SearchFragment extends BaseFragment {
                 public void onGotUsers(List<User> users) {
 //                showToast("Total: " + users.size());
                     if (users != null && users.size() > 0) {
-                        User user = users.get(0);
+                        final User user = users.get(0);
                         usersListAdapter.addUseTop(user);
                         rv_users.scrollToPosition(0);
+                        controller.getHashFromUrl(user.getUrl(), new SearchController.GetHashCallBack() {
+                            @Override
+                            public void onGetHash(String hash) {
+                                user.setUrl_hash(hash);
+                                int position = usersListAdapter.getList().indexOf(user);
+                                usersListAdapter.notifyItemChanged(position);
+                            }
+                        });
                     } else {
                         showToast("Nenhum usuário encontrado!");
                     }
@@ -133,5 +140,22 @@ public class SearchFragment extends BaseFragment {
 
     private void showToast(String msg) {
         Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onUserSelected(User user) {
+        showFacebookSharingDialog(user);
+    }
+
+    private void showFacebookSharingDialog(User user) {
+        ShareLinkContent content = new ShareLinkContent.Builder()
+                .setContentUrl(Uri.parse(user.getUrl()))
+                .setImageUrl(Uri.parse(user.getAvatar_url()))
+                .setContentTitle(user.getLogin())
+                .setContentDescription(getActivity().getString(R.string.facebook_share_description))
+                .build();
+
+        ShareDialog shareDialog = new ShareDialog(getActivity());
+        shareDialog.show(content, ShareDialog.Mode.AUTOMATIC);
     }
 }

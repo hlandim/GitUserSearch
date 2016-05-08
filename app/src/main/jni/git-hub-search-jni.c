@@ -9,7 +9,7 @@
  * */
 unsigned long
 hash(unsigned char *str) {
-    unsigned long hash = 5381;
+    unsigned long hash = 10;
     int c;
 
     while (c = *str++)
@@ -20,18 +20,12 @@ hash(unsigned char *str) {
 
 
 JNIEXPORT jlong JNICALL
-Java_com_hlandim_gituserssearch_adapter_UsersListAdapter_getDjb2HashUrl(JNIEnv *env,
-                                                                        jobject instance,
-                                                                        jstring url_) {
-    // __android_log_write(ANDROID_LOG_DEBUG, "JNI_LIB", url_);
+Java_com_hlandim_gituserssearch_web_GitHubApi_getDjb2HashUrl(JNIEnv *env, jobject instance,
+                                                             jstring url_) {
 
-//    char *mystring = (*env)->GetStringChars(env, url_, JNI_TRUE);
-
-    int vaules = hash(url_);
-
-    // __android_log_write(ANDROID_LOG_DEBUG, "JNI_LIB", vaules);
+    const char *key = (*env)->GetStringUTFChars(env, url_, 0);
 
 
-    return vaules;
+    return hash(key);
 
 }

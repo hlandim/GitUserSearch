@@ -2,7 +2,7 @@ package com.hlandim.gituserssearch.controller;
 
 import android.content.Context;
 import android.content.ContextWrapper;
-import android.graphics.Bitmap;
+import android.text.TextUtils;
 
 import com.hlandim.gituserssearch.model.User;
 import com.hlandim.gituserssearch.web.GitHubApi;
@@ -22,6 +22,7 @@ public class SearchController extends ContextWrapper {
     public SearchController(Context base) {
         super(base);
     }
+
 
     public void getUsers(String search, final GetUsersCallback callback) {
         GitHubApi.getInstance().getUsers(search, new GitHubApi.GitHubCallBack() {
@@ -49,34 +50,26 @@ public class SearchController extends ContextWrapper {
         });
     }
 
-    public void getUserImage(String url, final GetUserAvatarCallback callback) {
-        GitHubApi.getInstance().getImage(url, new GitHubApi.GitHubImageCallBack() {
-            @Override
-            public void onGetBitmap(Bitmap bitmap) {
-                if (callback != null) {
-                    callback.onGotAvatar(bitmap);
-                }
-            }
+    public void getHashFromUrl(final String url, final GetHashCallBack getHashCallBack) {
 
-            @Override
-            public void onGetError(String msgError) {
-                if (callback != null) {
-                    callback.onGotError(msgError);
+        if (getHashCallBack != null && !TextUtils.isEmpty(url)) {
+            GitHubApi.getInstance().getHash(url, new GitHubApi.GetHashUrlCallback() {
+                @Override
+                public void onGotHash(String hash) {
+                    getHashCallBack.onGetHash(hash);
                 }
-            }
-        });
+            });
+        }
     }
 
+
+    public interface GetHashCallBack {
+        void onGetHash(String hash);
+    }
 
     public interface GetUsersCallback {
         void onGotUsers(List<User> users);
 
         void onGotError(String errorMessage);
-    }
-
-    public interface GetUserAvatarCallback {
-        void onGotAvatar(Bitmap avatar);
-
-        void onGotError(String msgError);
     }
 }

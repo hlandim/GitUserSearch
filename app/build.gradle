@@ -9,7 +9,7 @@ model {
 
         defaultConfig {
             applicationId "com.hlandim.gituserssearch"
-            minSdkVersion.apiLevel 15
+            minSdkVersion.apiLevel 16
             targetSdkVersion.apiLevel 23
             versionCode 1
             versionName "1.0"

@@ -12,6 +12,7 @@ public class User {
     private String url;
     private String login;
     private String avatar_url;
+    private String url_hash;
 
     private User(String id, String url, String avatar_url, String login) {
         this.id = id;
@@ -25,7 +26,7 @@ public class User {
             return null;
         }
         String id = jsonObject.getString("id");
-        String url = jsonObject.getString("url");
+        String url = jsonObject.getString("html_url");
         String avatar_url = jsonObject.getString("avatar_url");
         String login = jsonObject.getString("login");
         return new User(id, url, avatar_url, login);
@@ -46,6 +47,14 @@ public class User {
 
     public String getLogin() {
         return login;
+    }
+
+    public void setUrl_hash(String url_hash) {
+        this.url_hash = url_hash;
+    }
+
+    public String getUrl_hash() {
+        return url_hash;
     }
 }
 

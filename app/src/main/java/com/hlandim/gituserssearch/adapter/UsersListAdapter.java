@@ -1,12 +1,14 @@
 package com.hlandim.gituserssearch.adapter;
 
 import android.graphics.Bitmap;
+import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.hlandim.gituserssearch.R;
@@ -20,11 +22,9 @@ import java.util.List;
  */
 public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.UserHolder> {
 
-    static {
-        System.loadLibrary("git-hub-search-jni");
-    }
 
     private List<User> list;
+    private UserListListener listener;
 
     public UsersListAdapter(List<User> list) {
         this.list = list;
@@ -38,11 +38,17 @@ public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.User
 
     @Override
     public void onBindViewHolder(final UserHolder userHolder, int position) {
-        User user = list.get(position);
+        final User user = list.get(position);
         userHolder.tv_id.setText("ID: " + user.getId());
         userHolder.tv_url.setText(user.getUrl());
         userHolder.tv_login.setText(user.getLogin());
-        userHolder.tv_hash_url.setText("HASH: " + getDjb2HashUrl(user.getUrl()));
+        //userHolder.tv_hash_url.setText(user.getUrl_hash());
+        if(user.getUrl_hash() != null){
+            userHolder.tv_hash_url.setText("HASH: " + user.getUrl_hash());
+            userHolder.pb_loading.setVisibility(View.GONE);
+        } else {
+            userHolder.pb_loading.setVisibility(View.VISIBLE);
+        }
         if (!TextUtils.isEmpty(user.getAvatar_url())) {
             GitHubApi.getInstance().getImage(user.getAvatar_url(), new GitHubApi.GitHubImageCallBack() {
                 @Override
@@ -73,15 +79,15 @@ public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.User
         return list;
     }
 
-    public native long getDjb2HashUrl(String url);
 
-    public class UserHolder extends RecyclerView.ViewHolder {
+    public class UserHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         public TextView tv_id;
         public TextView tv_url;
         public TextView tv_login;
         public ImageView img_avatar;
         public TextView tv_hash_url;
+        public ProgressBar pb_loading;
 
         public UserHolder(View itemView) {
             super(itemView);
@@ -90,6 +96,25 @@ public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.User
             tv_login = (TextView) itemView.findViewById(R.id.tv_login);
             img_avatar = (ImageView) itemView.findViewById(R.id.img_avatar);
             tv_hash_url = (TextView) itemView.findViewById(R.id.tv_hash_url);
+            pb_loading = (ProgressBar) itemView.findViewById(R.id.pb_loading);
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            if (listener != null) {
+                Integer position = Integer.valueOf(getLayoutPosition());
+                listener.onUserSelected(list.get(position));
+            }
         }
     }
+
+    public interface UserListListener {
+        void onUserSelected(User user);
+    }
+
+    public void setListener(UserListListener listener) {
+        this.listener = listener;
+    }
+
 }

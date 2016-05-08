@@ -28,10 +28,18 @@ public class GitHubApi {
     private static final String KEY_MSG_ERROR = "msgError";
     private static final String KEY_MSG_IMAGE = "image";
     private static GitHubApi instance;
-    private final ExecutorService executorService;
+    private final ExecutorService executorWebService;
+    private final ExecutorService executorHashService;
+
+    static {
+        System.loadLibrary("git-hub-search-jni");
+    }
+
+    private native long getDjb2HashUrl(String url);
 
     private GitHubApi() {
-        executorService = Executors.newFixedThreadPool(1);
+        executorWebService = Executors.newFixedThreadPool(1);
+        executorHashService = Executors.newFixedThreadPool(1);
     }
 
     public static GitHubApi getInstance() {
@@ -47,7 +55,7 @@ public class GitHubApi {
 
         final Handler handler = new CallUserHandler(gitHubCallBack);
 
-        executorService.execute(new Runnable() {
+        executorWebService.execute(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -129,7 +137,7 @@ public class GitHubApi {
 
         final Handler handler = new CallImageHandler(gitHubImageCallBack);
 
-        executorService.execute(new Runnable() {
+        executorWebService.execute(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -163,9 +171,30 @@ public class GitHubApi {
 
     }
 
+    public void getHash(final String url, final GetHashUrlCallback getHashUrlCallback) {
+
+        final Handler handler = new CallHashHandler(getHashUrlCallback);
+
+        executorHashService.execute(new Runnable() {
+            @Override
+            public void run() {
+                long hash = getDjb2HashUrl(url);
+                Message message = new Message();
+                Bundle bundle = new Bundle();
+                bundle.putLong("hash", hash);
+                message.setData(bundle);
+                handler.sendMessage(message);
+            }
+        });
+
+    }
+
     public void close() {
-        if (executorService != null) {
-            executorService.shutdown();
+        if (executorWebService != null) {
+            executorWebService.shutdown();
+        }
+        if (executorHashService != null) {
+            executorHashService.shutdown();
         }
         instance = null;
     }
@@ -180,6 +209,11 @@ public class GitHubApi {
         void onGetResponse(String jsonResponse);
 
         void onGetError(String erroMsg);
+    }
+
+
+    public interface GetHashUrlCallback {
+        void onGotHash(String hash);
     }
 
     private class CallImageHandler extends Handler {
@@ -218,6 +252,25 @@ public class GitHubApi {
             } else {
                 gitHubCallBack.onGetError(msg.getData().getString(KEY_MSG_ERROR));
             }
+        }
+    }
+
+    private class CallHashHandler extends Handler {
+        private GetHashUrlCallback getHashUrlCallback;
+
+        public CallHashHandler(GetHashUrlCallback getHashUrlCallback) {
+            this.getHashUrlCallback = getHashUrlCallback;
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            Bundle bundle = msg.getData();
+            long hash = 0;
+            if (bundle != null) {
+                hash = bundle.getLong("hash", 0);
+            }
+            getHashUrlCallback.onGotHash(String.valueOf(hash));
         }
     }
 }
