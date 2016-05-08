@@ -28,8 +28,7 @@ public class User {
         String url = jsonObject.getString("url");
         String avatar_url = jsonObject.getString("avatar_url");
         String login = jsonObject.getString("login");
-        User user = new User(id, url, avatar_url, login);
-        return user;
+        return new User(id, url, avatar_url, login);
 
     }
 

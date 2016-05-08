@@ -6,11 +6,13 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.facebook.share.model.ShareLinkContent;
@@ -30,11 +32,11 @@ import java.util.List;
  */
 public class SearchFragment extends BaseFragment {
 
-    private Button btn_find;
     private SearchController controller;
     private EditText edt_search;
     private RecyclerView rv_users;
     private UsersListAdapter usersListAdapter;
+    private ProgressBar pb_loading;
 
     @Nullable
     @Override
@@ -43,11 +45,12 @@ public class SearchFragment extends BaseFragment {
         configureBtnFind(view);
         configureUserList(view);
         controller = new SearchController(getContext());
+        pb_loading = (ProgressBar) view.findViewById(R.id.pb_loading);
         return view;
     }
 
     private void configureBtnFind(View view) {
-        btn_find = (Button) view.findViewById(R.id.btn_find);
+        Button btn_find = (Button) view.findViewById(R.id.btn_find);
         btn_find.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -99,24 +102,33 @@ public class SearchFragment extends BaseFragment {
 
     private void getUsers() {
         String search = edt_search.getText().toString();
-        controller.getUsers(search, new SearchController.GetUsersCallback() {
-            @Override
-            public void onGotUsers(List<User> users) {
+        if (TextUtils.isEmpty(search)) {
+            edt_search.setError("Digite um usuário válido!");
+        } else {
+            edt_search.setError(null);
+            pb_loading.setVisibility(View.VISIBLE);
+            controller.getUsers(search, new SearchController.GetUsersCallback() {
+                @Override
+                public void onGotUsers(List<User> users) {
 //                showToast("Total: " + users.size());
-                if (users != null && users.size() > 0) {
-                    User user = users.get(0);
-                    usersListAdapter.addUser(user, 0);
-                    rv_users.scrollToPosition(0);
-                } else {
-                    showToast("Nenhum usuário encontrado!");
-                }
-            }
+                    if (users != null && users.size() > 0) {
+                        User user = users.get(0);
+                        usersListAdapter.addUseTop(user);
+                        rv_users.scrollToPosition(0);
+                    } else {
+                        showToast("Nenhum usuário encontrado!");
+                    }
 
-            @Override
-            public void onGotError(String errorMessage) {
-                showToast("Error : " + errorMessage);
-            }
-        });
+                    pb_loading.setVisibility(View.GONE);
+                }
+
+                @Override
+                public void onGotError(String errorMessage) {
+                    showToast("Error : " + errorMessage);
+                    pb_loading.setVisibility(View.GONE);
+                }
+            });
+        }
     }
 
     private void showToast(String msg) {

@@ -28,4 +28,13 @@ public enum PageId {
     public void setFragment(BaseFragment fragment) {
         this.fragment = fragment;
     }
+
+    public static PageId getPageId(BaseFragment baseFragment){
+        for (PageId pageId : PageId.values()) {
+            if(baseFragment == pageId.getFragment()){
+                return pageId;
+            }
+        }
+        return null;
+    }
 }

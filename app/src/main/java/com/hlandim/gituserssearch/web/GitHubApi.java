@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -27,7 +28,7 @@ public class GitHubApi {
     private static final String KEY_MSG_ERROR = "msgError";
     private static final String KEY_MSG_IMAGE = "image";
     private static GitHubApi instance;
-    private ExecutorService executorService;
+    private final ExecutorService executorService;
 
     private GitHubApi() {
         executorService = Executors.newFixedThreadPool(1);
@@ -42,27 +43,17 @@ public class GitHubApi {
     }
 
 
-    public void getUsers(final String userName, final GitHubCallBack gitHubCallBack) {
+    public void getUsers(final String userName, GitHubCallBack gitHubCallBack) {
 
-        final Handler handler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                super.handleMessage(msg);
-                if (msg.arg1 == CODE_SUCCESS) {
-                    gitHubCallBack.onGetResponse(msg.getData().getString(KEY_MSG_SUCCESS));
-                } else {
-                    gitHubCallBack.onGetError(msg.getData().getString(KEY_MSG_ERROR));
-                }
-            }
-        };
+        final Handler handler = new CallUserHandler(gitHubCallBack);
 
         executorService.execute(new Runnable() {
             @Override
             public void run() {
                 try {
 
-
-                    URL url = new URL(SEARCH_URL + userName);
+                    String finalUrl = URLEncoder.encode(userName, "utf-8");
+                    URL url = new URL(SEARCH_URL + finalUrl);
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                     conn.setRequestMethod("GET");
                     conn.setRequestProperty("Accept", "application/json");
@@ -134,20 +125,9 @@ public class GitHubApi {
         }
     }
 
-    public void getImage(final String urlString, final GitHubImageCallBack gitHubImageCallBack) {
+    public void getImage(final String urlString, GitHubImageCallBack gitHubImageCallBack) {
 
-        final Handler handler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                super.handleMessage(msg);
-                if (msg.arg1 == CODE_SUCCESS) {
-                    Bitmap bitmap = msg.getData().getParcelable(KEY_MSG_IMAGE);
-                    gitHubImageCallBack.onGetBitmap(bitmap);
-                } else {
-                    gitHubImageCallBack.onGetError(msg.getData().getString(KEY_MSG_ERROR));
-                }
-            }
-        };
+        final Handler handler = new CallImageHandler(gitHubImageCallBack);
 
         executorService.execute(new Runnable() {
             @Override
@@ -156,7 +136,7 @@ public class GitHubApi {
                     URL url = new URL(urlString);
                     sendImageMsg(getImage(url));
                 } catch (Exception e) {
-                    sendMsg(false, e.getMessage());
+                    sendErrorMsg(e.getMessage());
                 }
             }
 
@@ -171,17 +151,11 @@ public class GitHubApi {
                 handler.sendMessage(message);
             }
 
-            private void sendMsg(boolean success, String msg) {
+            private void sendErrorMsg(String msg) {
                 Message message = new Message();
                 Bundle bundle = new Bundle();
-                if (success) {
-                    message.arg1 = CODE_SUCCESS;
-                    bundle.putString(KEY_MSG_SUCCESS, msg);
-                } else {
-                    message.arg1 = CODE_ERROR;
-                    bundle.putString(KEY_MSG_ERROR, msg);
-
-                }
+                message.arg1 = CODE_ERROR;
+                bundle.putString(KEY_MSG_ERROR, msg);
                 message.setData(bundle);
                 handler.sendMessage(message);
             }
@@ -206,5 +180,44 @@ public class GitHubApi {
         void onGetResponse(String jsonResponse);
 
         void onGetError(String erroMsg);
+    }
+
+    private class CallImageHandler extends Handler {
+
+        private GitHubImageCallBack gitHubImageCallBack;
+
+        public CallImageHandler(GitHubImageCallBack gitHubImageCallBack) {
+            this.gitHubImageCallBack = gitHubImageCallBack;
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            if (msg.arg1 == CODE_SUCCESS) {
+                Bitmap bitmap = msg.getData().getParcelable(KEY_MSG_IMAGE);
+                gitHubImageCallBack.onGetBitmap(bitmap);
+            } else {
+                gitHubImageCallBack.onGetError(msg.getData().getString(KEY_MSG_ERROR));
+            }
+        }
+    }
+
+    private class CallUserHandler extends Handler {
+
+        private GitHubCallBack gitHubCallBack;
+
+        public CallUserHandler(GitHubCallBack gitHubCallBack) {
+            this.gitHubCallBack = gitHubCallBack;
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            if (msg.arg1 == CODE_SUCCESS) {
+                gitHubCallBack.onGetResponse(msg.getData().getString(KEY_MSG_SUCCESS));
+            } else {
+                gitHubCallBack.onGetError(msg.getData().getString(KEY_MSG_ERROR));
+            }
+        }
     }
 }

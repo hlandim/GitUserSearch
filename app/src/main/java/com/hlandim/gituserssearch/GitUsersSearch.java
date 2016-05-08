@@ -16,7 +16,7 @@ public class GitUsersSearch extends Application {
         configureFaceBoock();
     }
 
-    private void configureFaceBoock(){
+    private void configureFaceBoock() {
         FacebookSdk.sdkInitialize(getApplicationContext());
         AppEventsLogger.activateApp(this);
     }

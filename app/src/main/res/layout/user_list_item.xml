@@ -4,13 +4,14 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="2dp"
+    android:animateLayoutChanges="true"
     android:foreground="?android:attr/selectableItemBackground"
     android:padding="10dp"
-    android:animateLayoutChanges="true"
     app:cardCornerRadius="5dp">
 
 
     <LinearLayout
+        android:baselineAligned="false"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
@@ -19,16 +20,17 @@
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_margin="2dp"
+            android:layout_margin="3dp"
+            android:padding="1dp"
             android:layout_weight="1">
 
             <com.github.siyamed.shapeimageview.CircularImageView
                 android:id="@+id/img_avatar"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_margin="5dp"
                 android:src="@drawable/user_48"
                 app:siBorderColor="@color/darkgray"
-                android:layout_margin="5dp"
                 app:siBorderWidth="2dp" />
 
         </LinearLayout>
@@ -44,7 +46,8 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1"
+                android:layout_marginBottom="5dp"
+                android:layout_weight="1.5"
                 android:orientation="horizontal">
 
                 <TextView
@@ -68,9 +71,17 @@
                 android:id="@+id/tv_url"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="2"
-                android:textStyle="italic"
-                android:text="https://api.github.com/users/hlandim" />
+                android:layout_weight="3.2"
+                android:text="https://api.github.com/users/hlandimdsfjisdjfojsdfoijds"
+                android:textStyle="italic" />
+
+            <TextView
+                android:id="@+id/tv_hash_url"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1.5"
+
+                android:text="HASH" />
 
         </LinearLayout>
 

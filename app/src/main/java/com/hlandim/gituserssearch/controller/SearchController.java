@@ -53,14 +53,14 @@ public class SearchController extends ContextWrapper {
         GitHubApi.getInstance().getImage(url, new GitHubApi.GitHubImageCallBack() {
             @Override
             public void onGetBitmap(Bitmap bitmap) {
-                if(callback != null) {
+                if (callback != null) {
                     callback.onGotAvatar(bitmap);
                 }
             }
 
             @Override
             public void onGetError(String msgError) {
-                if(callback != null) {
+                if (callback != null) {
                     callback.onGotError(msgError);
                 }
             }

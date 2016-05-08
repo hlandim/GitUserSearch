@@ -1,36 +1,46 @@
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.model.application'
 
-android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.2"
 
-    defaultConfig {
-        applicationId "com.hlandim.gituserssearch"
-        minSdkVersion 15
-        targetSdkVersion 23
-        versionCode 1
-        versionName "1.0"
-    }
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+model {
+
+    android {
+        compileSdkVersion 23
+        buildToolsVersion "23.0.2"
+
+        defaultConfig {
+            applicationId "com.hlandim.gituserssearch"
+            minSdkVersion.apiLevel 15
+            targetSdkVersion.apiLevel 23
+            versionCode 1
+            versionName "1.0"
+        }
+        buildTypes {
+            release {
+                minifyEnabled false
+                proguardFiles.add(file("proguard-rules.pro"))
+
+            }
+        }
+
+        ndk {
+            moduleName = "git-hub-search-jni"
         }
     }
-}
 
-repositories {
-    maven {
-        url "https://jitpack.io"
+    repositories {
+        maven {
+            url "https://jitpack.io"
+        }
     }
+
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:24.+'
-    compile 'com.android.support:recyclerview-v7:24.+'
-    compile 'com.android.support:cardview-v7:24.+'
-    compile 'com.android.support:design:24.+'
+    compile 'com.android.support:appcompat-v7:23.3.0'
+    compile 'com.android.support:recyclerview-v7:23.3.0'
+    compile 'com.android.support:cardview-v7:23.3.0'
+    compile 'com.android.support:design:23.3.0'
     compile 'com.github.siyamed:android-shape-imageview:0.9.3'
     compile 'com.facebook.android:facebook-android-sdk:[4,5)'
 

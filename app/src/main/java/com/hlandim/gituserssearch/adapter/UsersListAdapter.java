@@ -20,6 +20,10 @@ import java.util.List;
  */
 public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.UserHolder> {
 
+    static {
+        System.loadLibrary("git-hub-search-jni");
+    }
+
     private List<User> list;
 
     public UsersListAdapter(List<User> list) {
@@ -29,16 +33,16 @@ public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.User
     @Override
     public UserHolder onCreateViewHolder(ViewGroup parent, int i) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.user_list_item, parent, false);
-        UserHolder userHolder = new UserHolder(view);
-        return userHolder;
+        return new UserHolder(view);
     }
 
     @Override
     public void onBindViewHolder(final UserHolder userHolder, int position) {
         User user = list.get(position);
-        userHolder.tv_id.setText(user.getId());
+        userHolder.tv_id.setText("ID: " + user.getId());
         userHolder.tv_url.setText(user.getUrl());
         userHolder.tv_login.setText(user.getLogin());
+        userHolder.tv_hash_url.setText("HASH: " + getDjb2HashUrl(user.getUrl()));
         if (!TextUtils.isEmpty(user.getAvatar_url())) {
             GitHubApi.getInstance().getImage(user.getAvatar_url(), new GitHubApi.GitHubImageCallBack() {
                 @Override
@@ -60,10 +64,16 @@ public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.User
         return list.size();
     }
 
-    public void addUser(User user, int position) {
-        list.add(position, user);
-        notifyItemInserted(position);
+    public void addUseTop(User user) {
+        list.add(0, user);
+        notifyItemInserted(0);
     }
+
+    public List<User> getList() {
+        return list;
+    }
+
+    public native long getDjb2HashUrl(String url);
 
     public class UserHolder extends RecyclerView.ViewHolder {
 
@@ -71,6 +81,7 @@ public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.User
         public TextView tv_url;
         public TextView tv_login;
         public ImageView img_avatar;
+        public TextView tv_hash_url;
 
         public UserHolder(View itemView) {
             super(itemView);
@@ -78,10 +89,7 @@ public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.User
             tv_url = (TextView) itemView.findViewById(R.id.tv_url);
             tv_login = (TextView) itemView.findViewById(R.id.tv_login);
             img_avatar = (ImageView) itemView.findViewById(R.id.img_avatar);
+            tv_hash_url = (TextView) itemView.findViewById(R.id.tv_hash_url);
         }
-    }
-
-    public List<User> getList() {
-        return list;
     }
 }

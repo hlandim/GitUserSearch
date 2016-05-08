@@ -9,10 +9,10 @@ import android.view.View;
 /**
  * Created by hlandim on 5/7/16.
  */
-public class RecyclerViewTouchListener implements RecyclerView.OnItemTouchListener{
+public class RecyclerViewTouchListener implements RecyclerView.OnItemTouchListener {
 
-    private GestureDetector gestureDetector;
-    private RecyclerViewClickListener clickListener;
+    private final GestureDetector gestureDetector;
+    private final RecyclerViewClickListener clickListener;
 
     public RecyclerViewTouchListener(Context context, final RecyclerView recyclerView, final RecyclerViewClickListener clickListener) {
         this.clickListener = clickListener;
@@ -26,7 +26,7 @@ public class RecyclerViewTouchListener implements RecyclerView.OnItemTouchListen
             public void onLongPress(MotionEvent e) {
                 View child = recyclerView.findChildViewUnder(e.getX(), e.getY());
                 if (child != null && clickListener != null) {
-                    clickListener.onLongClick(child, recyclerView.getChildPosition(child));
+                    clickListener.onLongClick(child, recyclerView.getChildAdapterPosition(child));
                 }
             }
         });
@@ -37,7 +37,7 @@ public class RecyclerViewTouchListener implements RecyclerView.OnItemTouchListen
 
         View child = rv.findChildViewUnder(e.getX(), e.getY());
         if (child != null && clickListener != null && gestureDetector.onTouchEvent(e)) {
-            clickListener.onClick(child, rv.getChildPosition(child));
+            clickListener.onClick(child, rv.getChildAdapterPosition(child));
         }
         return false;
     }
