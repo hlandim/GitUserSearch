@@ -1,6 +1,5 @@
 package com.hlandim.gituserssearch.fragment;
 
-import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -66,30 +65,6 @@ public class SearchFragment extends BaseFragment implements UsersListAdapter.Use
             usersListAdapter = new UsersListAdapter(new ArrayList<User>());
         }
         rv_users.setAdapter(usersListAdapter);
-        final Context applicationContext = getActivity().getApplicationContext();
-//        rv_users.addOnItemTouchListener(new RecyclerViewTouchListener(applicationContext, rv_users, new RecyclerViewClickListener() {
-//            @Override
-//            public void onClick(View view, int position) {
-//                // Toast.makeText(applicationContext, usersListAdapter.getList().get(position).getLogin() + " is clicked!", Toast.LENGTH_SHORT).show();
-//                User user = usersListAdapter.getList().get(position);
-//                ShareLinkContent content = new ShareLinkContent.Builder()
-//                        .setContentUrl(Uri.parse(user.getUrl()))
-//                        .setImageUrl(Uri.parse(user.getAvatar_url()))
-//                        .setContentTitle(user.getLogin())
-//                        .setContentDescription(getActivity().getString(R.string.facebook_share_description))
-//                        .build();
-//
-//                ShareDialog shareDialog = new ShareDialog(getActivity());
-//                shareDialog.show(content, ShareDialog.Mode.AUTOMATIC);
-//
-//            }
-//
-//            @Override
-//            public void onLongClick(View view, int position) {
-//                //Toast.makeText(applicationContext, usersListAdapter.getList().get(position).getLogin() +" is long pressed!", Toast.LENGTH_SHORT).show();
-//
-//            }
-//        }));
         usersListAdapter.setListener(this);
     }
 
@@ -106,36 +81,43 @@ public class SearchFragment extends BaseFragment implements UsersListAdapter.Use
         } else {
             edt_search.setError(null);
             pb_loading.setVisibility(View.VISIBLE);
-            controller.getUsers(search, new SearchController.GetUsersCallback() {
-                @Override
-                public void onGotUsers(List<User> users) {
-//                showToast("Total: " + users.size());
-                    if (users != null && users.size() > 0) {
-                        final User user = users.get(0);
-                        usersListAdapter.addUseTop(user);
-                        rv_users.scrollToPosition(0);
-                        controller.getHashFromUrl(user.getUrl(), new SearchController.GetHashCallBack() {
-                            @Override
-                            public void onGetHash(String hash) {
-                                user.setUrl_hash(hash);
-                                int position = usersListAdapter.getList().indexOf(user);
-                                usersListAdapter.notifyItemChanged(position);
-                            }
-                        });
-                    } else {
-                        showToast("Nenhum usuário encontrado!");
-                    }
-
-                    pb_loading.setVisibility(View.GONE);
-                }
-
-                @Override
-                public void onGotError(String errorMessage) {
-                    showToast("Error : " + errorMessage);
-                    pb_loading.setVisibility(View.GONE);
-                }
-            });
+            getUser(search);
         }
+    }
+
+    private void getUser(String search) {
+        controller.getUsers(search, new SearchController.GetUsersCallback() {
+            @Override
+            public void onGotUsers(List<User> users) {
+                if (users != null && users.size() > 0) {
+                    final User user = users.get(0);
+                    usersListAdapter.addUseTop(user);
+                    rv_users.scrollToPosition(0);
+                    getUrlHash(user);
+                } else {
+                    showToast("Nenhum usuário encontrado!");
+                }
+
+                pb_loading.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onGotError(String errorMessage) {
+                showToast("Error : " + errorMessage);
+                pb_loading.setVisibility(View.GONE);
+            }
+        });
+    }
+
+    private void getUrlHash(final User user) {
+        controller.getHashFromUrl(user.getUrl(), new SearchController.GetHashCallBack() {
+            @Override
+            public void onGetHash(String hash) {
+                user.setUrl_hash(hash);
+                int position = usersListAdapter.getList().indexOf(user);
+                usersListAdapter.notifyItemChanged(position);
+            }
+        });
     }
 
     private void showToast(String msg) {

@@ -25,7 +25,7 @@ public class SearchController extends ContextWrapper {
 
 
     public void getUsers(String search, final GetUsersCallback callback) {
-        GitHubApi.getInstance().getUsers(search, new GitHubApi.GitHubCallBack() {
+        GitHubApi.getInstance().getUsers(search, new GitHubApi.GitHubUsersCallBack() {
             @Override
             public void onGetResponse(String jsonResponse) {
                 try {

@@ -51,9 +51,9 @@ public class GitHubApi {
 
     private native long getDjb2HashUrl(String url);
 
-    public void getUsers(final String userName, GitHubCallBack gitHubCallBack) {
+    public void getUsers(final String userName, GitHubUsersCallBack gitHubUsersCallBack) {
 
-        final Handler handler = new CallUserHandler(gitHubCallBack);
+        final Handler handler = new CallUserHandler(gitHubUsersCallBack);
 
         executorWebService.execute(new Runnable() {
             @Override
@@ -205,7 +205,7 @@ public class GitHubApi {
         void onGetError(String msgError);
     }
 
-    public interface GitHubCallBack {
+    public interface GitHubUsersCallBack {
         void onGetResponse(String jsonResponse);
 
         void onGetError(String erroMsg);
@@ -238,19 +238,19 @@ public class GitHubApi {
 
     private static class CallUserHandler extends Handler {
 
-        private GitHubCallBack gitHubCallBack;
+        private GitHubUsersCallBack gitHubUsersCallBack;
 
-        public CallUserHandler(GitHubCallBack gitHubCallBack) {
-            this.gitHubCallBack = gitHubCallBack;
+        public CallUserHandler(GitHubUsersCallBack gitHubUsersCallBack) {
+            this.gitHubUsersCallBack = gitHubUsersCallBack;
         }
 
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             if (msg.arg1 == CODE_SUCCESS) {
-                gitHubCallBack.onGetResponse(msg.getData().getString(KEY_MSG_SUCCESS));
+                gitHubUsersCallBack.onGetResponse(msg.getData().getString(KEY_MSG_SUCCESS));
             } else {
-                gitHubCallBack.onGetError(msg.getData().getString(KEY_MSG_ERROR));
+                gitHubUsersCallBack.onGetError(msg.getData().getString(KEY_MSG_ERROR));
             }
         }
     }
