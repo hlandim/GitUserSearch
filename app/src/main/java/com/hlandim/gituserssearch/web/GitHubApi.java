@@ -216,7 +216,7 @@ public class GitHubApi {
         void onGotHash(String hash);
     }
 
-    private class CallImageHandler extends Handler {
+    private static class CallImageHandler extends Handler {
 
         private GitHubImageCallBack gitHubImageCallBack;
 
@@ -236,7 +236,7 @@ public class GitHubApi {
         }
     }
 
-    private class CallUserHandler extends Handler {
+    private static class CallUserHandler extends Handler {
 
         private GitHubCallBack gitHubCallBack;
 
@@ -255,7 +255,7 @@ public class GitHubApi {
         }
     }
 
-    private class CallHashHandler extends Handler {
+    private static class CallHashHandler extends Handler {
         private GetHashUrlCallback getHashUrlCallback;
 
         public CallHashHandler(GetHashUrlCallback getHashUrlCallback) {
