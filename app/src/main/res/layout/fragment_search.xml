@@ -25,11 +25,11 @@
                     android:id="@+id/edt_search"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:maxLines="1"
                     android:ellipsize="end"
-                    android:scrollHorizontally="true"
+                    android:hint="@string/user"
                     android:inputType="text"
-                    android:hint="@string/user" />
+                    android:maxLines="1"
+                    android:scrollHorizontally="true" />
 
             </android.support.design.widget.TextInputLayout>
 
@@ -54,8 +54,8 @@
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_users"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="7"
-        android:layout_width="match_parent" />
+        android:layout_weight="7" />
 
 </LinearLayout>

@@ -28,14 +28,13 @@ public class GitHubApi {
     private static final String KEY_MSG_ERROR = "msgError";
     private static final String KEY_MSG_IMAGE = "image";
     private static GitHubApi instance;
-    private final ExecutorService executorWebService;
-    private final ExecutorService executorHashService;
 
     static {
         System.loadLibrary("git-hub-search-jni");
     }
 
-    private native long getDjb2HashUrl(String url);
+    private final ExecutorService executorWebService;
+    private final ExecutorService executorHashService;
 
     private GitHubApi() {
         executorWebService = Executors.newFixedThreadPool(1);
@@ -50,6 +49,7 @@ public class GitHubApi {
         return instance;
     }
 
+    private native long getDjb2HashUrl(String url);
 
     public void getUsers(final String userName, GitHubCallBack gitHubCallBack) {
 

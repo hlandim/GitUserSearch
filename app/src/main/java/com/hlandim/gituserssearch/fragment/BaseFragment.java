@@ -11,7 +11,7 @@ public class BaseFragment extends Fragment {
 
     private NewFragmentStateListener _fragmentStateListener;
 
-    public void setFragmentStateListener(NewFragmentStateListener listener){
+    public void setFragmentStateListener(NewFragmentStateListener listener) {
         _fragmentStateListener = listener;
     }
 

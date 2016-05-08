@@ -49,12 +49,12 @@ public class User {
         return login;
     }
 
-    public void setUrl_hash(String url_hash) {
-        this.url_hash = url_hash;
-    }
-
     public String getUrl_hash() {
         return url_hash;
+    }
+
+    public void setUrl_hash(String url_hash) {
+        this.url_hash = url_hash;
     }
 }
 

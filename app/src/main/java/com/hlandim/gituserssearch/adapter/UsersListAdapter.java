@@ -1,7 +1,6 @@
 package com.hlandim.gituserssearch.adapter;
 
 import android.graphics.Bitmap;
-import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -43,7 +42,7 @@ public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.User
         userHolder.tv_url.setText(user.getUrl());
         userHolder.tv_login.setText(user.getLogin());
         //userHolder.tv_hash_url.setText(user.getUrl_hash());
-        if(user.getUrl_hash() != null){
+        if (user.getUrl_hash() != null) {
             userHolder.tv_hash_url.setText("HASH: " + user.getUrl_hash());
             userHolder.pb_loading.setVisibility(View.GONE);
         } else {
@@ -79,6 +78,13 @@ public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.User
         return list;
     }
 
+    public void setListener(UserListListener listener) {
+        this.listener = listener;
+    }
+
+    public interface UserListListener {
+        void onUserSelected(User user);
+    }
 
     public class UserHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
@@ -107,14 +113,6 @@ public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.User
                 listener.onUserSelected(list.get(position));
             }
         }
-    }
-
-    public interface UserListListener {
-        void onUserSelected(User user);
-    }
-
-    public void setListener(UserListListener listener) {
-        this.listener = listener;
     }
 
 }
