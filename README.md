@@ -5,6 +5,7 @@ Recursos:
 - Android NDK para criar a chave HASH da Url do usuário.
 - Compartilhamento do usuário encontrado na TimeLine do Facebook.
 - RecycleView.
+- Persistência do histórico em banco.
 
 Listagem
 --------
