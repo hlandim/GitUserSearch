@@ -4,5 +4,12 @@ Recursos:
 - Utilizando Handle, Runnable e ExecutorService para realizar chamadas assíncronas ao serviço do GitHub (https://developer.github.com/v3/search/#search-users)
 - Android NDK para criar a chave HASH da Url do usuário.
 - Compartilhamento do usuário encontrado na TimeLine do Facebook.
-![print](https://github.com/hlandim/GitUserSearch/blob/master/print.png)
+
+Listagem
+![list](https://github.com/hlandim/GitUserSearch/blob/master/print/list.png)
+Removendo
+![list](https://github.com/hlandim/GitUserSearch/blob/master/print/remove.png)
+Compartilhamento(Facebook)
+Listagem
+![facebook_sharing](https://github.com/hlandim/GitUserSearch/blob/master/print/facebook_share.png)
 
