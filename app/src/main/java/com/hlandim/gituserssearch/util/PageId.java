@@ -14,7 +14,7 @@ public enum PageId {
         }
     };
 
-    private BaseFragment fragment;
+    private BaseFragment mFragment;
 
     public static PageId getPageId(BaseFragment baseFragment) {
         for (PageId pageId : PageId.values()) {
@@ -28,13 +28,13 @@ public enum PageId {
     abstract BaseFragment getFragmentInstance();
 
     public BaseFragment getFragment() {
-        if (fragment == null) {
-            fragment = getFragmentInstance();
+        if (mFragment == null) {
+            mFragment = getFragmentInstance();
         }
-        return fragment;
+        return mFragment;
     }
 
-    public void setFragment(BaseFragment fragment) {
-        this.fragment = fragment;
+    public void setmFragment(BaseFragment mFragment) {
+        this.mFragment = mFragment;
     }
 }

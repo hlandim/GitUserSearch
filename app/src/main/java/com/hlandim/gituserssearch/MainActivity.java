@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity implements NewFragmentStateL
     protected void onPause() {
         super.onPause();
         if (currentPage != null) {
-            currentPage.setFragment(null);
+            currentPage.setmFragment(null);
         }
     }
 
@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity implements NewFragmentStateL
         if (frag != null) {
             PageId pageId = PageId.getPageId(frag);
             if (pageId != null) {
-                pageId.setFragment(null);
+                pageId.setmFragment(null);
             }
         }
     }

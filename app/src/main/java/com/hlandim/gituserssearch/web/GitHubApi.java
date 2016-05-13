@@ -5,6 +5,14 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Parcelable;
+import android.util.Log;
+
+import com.hlandim.gituserssearch.model.User;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,6 +21,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -22,6 +32,7 @@ import java.util.concurrent.Executors;
 public class GitHubApi {
 
     private static final String SEARCH_URL = "https://api.github.com/search/users?q=";
+    private static final String TAG = GitHubApi.class.getSimpleName();
     private static final int CODE_ERROR = 1;
     private static final int CODE_SUCCESS = 0;
     private static final String KEY_MSG_SUCCESS = "msgSuccess";
@@ -79,7 +90,8 @@ public class GitHubApi {
                         while ((line = br.readLine()) != null) {
                             response.append(line);
                         }
-                        sendMsg(true, response.toString());
+                        List<User> users = getUsersList(response.toString());
+                        sendUsersMsg(users);
                     }
                     conn.disconnect();
 
@@ -93,6 +105,15 @@ public class GitHubApi {
 
                 }
 
+            }
+
+            private void sendUsersMsg(List<User> users) {
+                Message message = new Message();
+                Bundle bundle = new Bundle();
+                message.arg1 = CODE_SUCCESS;
+                bundle.putParcelableArrayList(KEY_MSG_SUCCESS, new ArrayList<Parcelable>(users));
+                message.setData(bundle);
+                handler.sendMessage(message);
             }
 
             private void sendMsg(boolean success, String msg) {
@@ -189,6 +210,24 @@ public class GitHubApi {
 
     }
 
+    private List<User> getUsersList(String jsonResponse) {
+        List<User> users = new ArrayList<>();
+        try {
+
+            JSONObject jsonObject = new JSONObject(jsonResponse);
+            JSONArray jsonArray = jsonObject.getJSONArray("items");
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject jsonObj = jsonArray.getJSONObject(i);
+                User user = User.newInstance(jsonObj);
+                users.add(user);
+            }
+        } catch (JSONException e) {
+            Log.e(TAG, e.getMessage());
+        }
+
+        return users;
+    }
+
     public void close() {
         if (executorWebService != null) {
             executorWebService.shutdown();
@@ -206,7 +245,7 @@ public class GitHubApi {
     }
 
     public interface GitHubUsersCallBack {
-        void onGetResponse(String jsonResponse);
+        void onGetResponse(List<User> users);
 
         void onGetError(String erroMsg);
     }
@@ -248,7 +287,8 @@ public class GitHubApi {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             if (msg.arg1 == CODE_SUCCESS) {
-                gitHubUsersCallBack.onGetResponse(msg.getData().getString(KEY_MSG_SUCCESS));
+                List<User> users = msg.getData().getParcelableArrayList(KEY_MSG_SUCCESS);
+                gitHubUsersCallBack.onGetResponse(users);
             } else {
                 gitHubUsersCallBack.onGetError(msg.getData().getString(KEY_MSG_ERROR));
             }

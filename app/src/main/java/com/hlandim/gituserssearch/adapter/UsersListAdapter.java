@@ -22,11 +22,11 @@ import java.util.List;
 public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.UserHolder> {
 
 
-    private List<User> list;
-    private UserListListener listener;
+    private List<User> mList;
+    private UserListListener mListener;
 
     public UsersListAdapter(List<User> list) {
-        this.list = list;
+        this.mList = list;
     }
 
     @Override
@@ -37,19 +37,18 @@ public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.User
 
     @Override
     public void onBindViewHolder(final UserHolder userHolder, int position) {
-        final User user = list.get(position);
-        userHolder.tv_id.setText("ID: " + user.getId());
+        final User user = mList.get(position);
+        userHolder.tv_id.setText("ID: " + user.getIdGitHub());
         userHolder.tv_url.setText(user.getUrl());
         userHolder.tv_login.setText(user.getLogin());
-        //userHolder.tv_hash_url.setText(user.getUrl_hash());
-        if (user.getUrl_hash() != null) {
-            userHolder.tv_hash_url.setText("HASH: " + user.getUrl_hash());
+        if (user.getUrlHash() != null) {
+            userHolder.tv_hash_url.setText("HASH: " + user.getUrlHash());
             userHolder.pb_loading.setVisibility(View.GONE);
         } else {
             userHolder.pb_loading.setVisibility(View.VISIBLE);
         }
-        if (!TextUtils.isEmpty(user.getAvatar_url())) {
-            GitHubApi.getInstance().getImage(user.getAvatar_url(), new GitHubApi.GitHubImageCallBack() {
+        if (!TextUtils.isEmpty(user.getAvatarUrl())) {
+            GitHubApi.getInstance().getImage(user.getAvatarUrl(), new GitHubApi.GitHubImageCallBack() {
                 @Override
                 public void onGetBitmap(Bitmap bitmap) {
                     userHolder.img_avatar.setImageBitmap(bitmap);
@@ -66,20 +65,29 @@ public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.User
 
     @Override
     public int getItemCount() {
-        return list.size();
+        return mList.size();
     }
 
     public void addUseTop(User user) {
-        list.add(0, user);
+        mList.add(0, user);
         notifyItemInserted(0);
     }
 
-    public List<User> getList() {
-        return list;
+    public void remover(int position){
+        mList.remove(position);
+        notifyItemRemoved(position);
     }
 
-    public void setListener(UserListListener listener) {
-        this.listener = listener;
+    public User getUser(int position) {
+        return mList.get(position);
+    }
+
+    public List<User> getmList() {
+        return mList;
+    }
+
+    public void setmListener(UserListListener mListener) {
+        this.mListener = mListener;
     }
 
     public interface UserListListener {
@@ -108,9 +116,9 @@ public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.User
 
         @Override
         public void onClick(View v) {
-            if (listener != null) {
+            if (mListener != null) {
                 Integer position = Integer.valueOf(getLayoutPosition());
-                listener.onUserSelected(list.get(position));
+                mListener.onUserSelected(mList.get(position));
             }
         }
     }

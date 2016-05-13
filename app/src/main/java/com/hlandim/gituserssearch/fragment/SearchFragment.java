@@ -1,10 +1,17 @@
 package com.hlandim.gituserssearch.fragment;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.RectF;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,7 +28,6 @@ import com.hlandim.gituserssearch.adapter.UsersListAdapter;
 import com.hlandim.gituserssearch.controller.SearchController;
 import com.hlandim.gituserssearch.model.User;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -29,20 +35,22 @@ import java.util.List;
  */
 public class SearchFragment extends BaseFragment implements UsersListAdapter.UserListListener {
 
-    private SearchController controller;
-    private EditText edt_search;
-    private RecyclerView rv_users;
-    private UsersListAdapter usersListAdapter;
-    private ProgressBar pb_loading;
+    private SearchController mController;
+    private EditText mEdtSearch;
+    private RecyclerView mRvUsers;
+    private UsersListAdapter mUsersListAdapter;
+    private ProgressBar mPbLoading;
+    private Paint mPaint = new Paint();
+
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_search, container, false);
+        mController = new SearchController(getContext());
         configureBtnFind(view);
         configureUserList(view);
-        controller = new SearchController(getContext());
-        pb_loading = (ProgressBar) view.findViewById(R.id.pb_loading);
+        mPbLoading = (ProgressBar) view.findViewById(R.id.pb_loading);
         return view;
     }
 
@@ -56,16 +64,60 @@ public class SearchFragment extends BaseFragment implements UsersListAdapter.Use
         });
     }
 
-    private void configureUserList(View view) {
-        edt_search = (EditText) view.findViewById(R.id.edt_search);
-        rv_users = (RecyclerView) view.findViewById(R.id.rv_users);
+    private void configureUserList(final View view) {
+        mEdtSearch = (EditText) view.findViewById(R.id.edt_search);
+        mRvUsers = (RecyclerView) view.findViewById(R.id.rv_users);
         RecyclerView.LayoutManager gridLayoutManager = new LinearLayoutManager(getActivity());
-        rv_users.setLayoutManager(gridLayoutManager);
-        if (usersListAdapter == null) {
-            usersListAdapter = new UsersListAdapter(new ArrayList<User>());
+        mRvUsers.setLayoutManager(gridLayoutManager);
+        if (mUsersListAdapter == null) {
+            List<User> users = mController.getLocalUsers();
+            mUsersListAdapter = new UsersListAdapter(users);
         }
-        rv_users.setAdapter(usersListAdapter);
-        usersListAdapter.setListener(this);
+        mRvUsers.setAdapter(mUsersListAdapter);
+        mUsersListAdapter.setmListener(this);
+
+        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(ItemTouchHelper.LEFT, ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                int position = viewHolder.getAdapterPosition();
+                User user = mUsersListAdapter.getUser(position);
+                mController.removeUser(user);
+                mUsersListAdapter.remover(position);
+
+
+            }
+
+            @Override
+            public void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+                Bitmap icon;
+                if(actionState == ItemTouchHelper.ACTION_STATE_SWIPE){
+
+                    View itemView = viewHolder.itemView;
+                    float height = (float) itemView.getBottom() - (float) itemView.getTop();
+                    float width = height / 3;
+
+                    if(dX > 0){
+                        mPaint.setColor(Color.parseColor("#D32F2F"));
+                        RectF background = new RectF((float) itemView.getRight() + dX, (float) itemView.getTop(),(float) itemView.getRight(), (float) itemView.getBottom());
+                        c.drawRect(background,mPaint);
+                        icon = BitmapFactory.decodeResource(getResources(), R.drawable.delete);
+                        RectF icon_dest = new RectF((float) itemView.getLeft() + width ,(float) itemView.getTop() + width,(float) itemView.getLeft()+ 2*width,(float)itemView.getBottom() - width);
+                        c.drawBitmap(icon,null,icon_dest,mPaint);
+                    }
+                }
+                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+            }
+        };
+
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
+
+        itemTouchHelper.attachToRecyclerView(mRvUsers);
+
     }
 
     @Override
@@ -75,47 +127,34 @@ public class SearchFragment extends BaseFragment implements UsersListAdapter.Use
     }
 
     private void getUsers() {
-        String search = edt_search.getText().toString();
+        String search = mEdtSearch.getText().toString();
         if (TextUtils.isEmpty(search)) {
-            edt_search.setError("Digite um usuário válido!");
+            mEdtSearch.setError("Digite um usuário válido!");
         } else {
-            edt_search.setError(null);
-            pb_loading.setVisibility(View.VISIBLE);
+            mEdtSearch.setError(null);
+            mPbLoading.setVisibility(View.VISIBLE);
             getUser(search);
         }
     }
 
     private void getUser(String search) {
-        controller.getUsers(search, new SearchController.GetUsersCallback() {
+        mController.getGitHubUsers(search, new SearchController.GetUsersCallback() {
             @Override
-            public void onGotUsers(List<User> users) {
-                if (users != null && users.size() > 0) {
-                    final User user = users.get(0);
-                    usersListAdapter.addUseTop(user);
-                    rv_users.scrollToPosition(0);
-                    getUrlHash(user);
+            public void onGotUsers(final User user) {
+                if (user != null) {
+                    mUsersListAdapter.addUseTop(user);
+                    mRvUsers.scrollToPosition(0);
                 } else {
-                    showToast("Nenhum usuário encontrado!");
+                    showToast(getString(R.string.no_users_found));
                 }
 
-                pb_loading.setVisibility(View.GONE);
+                mPbLoading.setVisibility(View.GONE);
             }
 
             @Override
             public void onGotError(String errorMessage) {
-                showToast("Error : " + errorMessage);
-                pb_loading.setVisibility(View.GONE);
-            }
-        });
-    }
-
-    private void getUrlHash(final User user) {
-        controller.getHashFromUrl(user.getUrl(), new SearchController.GetHashCallBack() {
-            @Override
-            public void onGetHash(String hash) {
-                user.setUrl_hash(hash);
-                int position = usersListAdapter.getList().indexOf(user);
-                usersListAdapter.notifyItemChanged(position);
+                showToast(errorMessage);
+                mPbLoading.setVisibility(View.GONE);
             }
         });
     }
@@ -132,7 +171,7 @@ public class SearchFragment extends BaseFragment implements UsersListAdapter.Use
     private void showFacebookSharingDialog(User user) {
         ShareLinkContent content = new ShareLinkContent.Builder()
                 .setContentUrl(Uri.parse(user.getUrl()))
-                .setImageUrl(Uri.parse(user.getAvatar_url()))
+                .setImageUrl(Uri.parse(user.getAvatarUrl()))
                 .setContentTitle(user.getLogin())
                 .setContentDescription(getActivity().getString(R.string.facebook_share_description))
                 .build();

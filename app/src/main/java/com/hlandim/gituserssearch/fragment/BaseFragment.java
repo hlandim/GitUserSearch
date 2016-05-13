@@ -9,17 +9,17 @@ import com.hlandim.gituserssearch.inteface.NewFragmentStateListener;
  */
 public class BaseFragment extends Fragment {
 
-    private NewFragmentStateListener _fragmentStateListener;
+    private NewFragmentStateListener mFragmentStateListener;
 
     public void setFragmentStateListener(NewFragmentStateListener listener) {
-        _fragmentStateListener = listener;
+        mFragmentStateListener = listener;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (_fragmentStateListener != null)
-            _fragmentStateListener.onFragmentRemoved(this);
+        if (mFragmentStateListener != null)
+            mFragmentStateListener.onFragmentRemoved(this);
     }
 
 }

@@ -2,16 +2,12 @@ package com.hlandim.gituserssearch.controller;
 
 import android.content.Context;
 import android.content.ContextWrapper;
-import android.text.TextUtils;
 
+import com.hlandim.gituserssearch.R;
+import com.hlandim.gituserssearch.dao.UserDao;
 import com.hlandim.gituserssearch.model.User;
 import com.hlandim.gituserssearch.web.GitHubApi;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,27 +15,39 @@ import java.util.List;
  */
 public class SearchController extends ContextWrapper {
 
+    private UserDao mUserDao;
+
     public SearchController(Context base) {
         super(base);
+        mUserDao = new UserDao(base);
     }
 
+    public List<User> getLocalUsers() {
+        return mUserDao.list();
+    }
 
-    public void getUsers(String search, final GetUsersCallback callback) {
-        GitHubApi.getInstance().getUsers(search, new GitHubApi.GitHubUsersCallBack() {
+    public void removeUser(User user) {
+        mUserDao.remove(user);
+    }
+
+    public void getGitHubUsers(String search, final GetUsersCallback callback) {
+        final GitHubApi gitHubApi = GitHubApi.getInstance();
+        gitHubApi.getUsers(search, new GitHubApi.GitHubUsersCallBack() {
             @Override
-            public void onGetResponse(String jsonResponse) {
-                try {
-                    List<User> users = new ArrayList<>();
-                    JSONObject jsonObject = new JSONObject(jsonResponse);
-                    JSONArray jsonArray = jsonObject.getJSONArray("items");
-                    for (int i = 0; i < jsonArray.length(); i++) {
-                        JSONObject jsonObj = jsonArray.getJSONObject(i);
-                        User user = User.newInstance(jsonObj);
-                        users.add(user);
-                    }
-                    callback.onGotUsers(users);
-                } catch (JSONException e) {
-                    callback.onGotError(e.getMessage());
+            public void onGetResponse(List<User> users) {
+                if (users != null && users.size() > 0) {
+                    final User user = users.get(0);
+                    gitHubApi.getHash(user.getUrl(), new GitHubApi.GetHashUrlCallback() {
+                        @Override
+                        public void onGotHash(String hash) {
+                            user.setUrlHash(hash);
+                            mUserDao.insert(user);
+                            callback.onGotUsers(user);
+                        }
+                    });
+
+                } else {
+                    callback.onGotError(getString(R.string.no_users_found));
                 }
             }
 
@@ -50,25 +58,8 @@ public class SearchController extends ContextWrapper {
         });
     }
 
-    public void getHashFromUrl(final String url, final GetHashCallBack getHashCallBack) {
-
-        if (getHashCallBack != null && !TextUtils.isEmpty(url)) {
-            GitHubApi.getInstance().getHash(url, new GitHubApi.GetHashUrlCallback() {
-                @Override
-                public void onGotHash(String hash) {
-                    getHashCallBack.onGetHash(hash);
-                }
-            });
-        }
-    }
-
-
-    public interface GetHashCallBack {
-        void onGetHash(String hash);
-    }
-
     public interface GetUsersCallback {
-        void onGotUsers(List<User> users);
+        void onGotUsers(User user);
 
         void onGotError(String errorMessage);
     }

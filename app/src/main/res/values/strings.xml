@@ -9,4 +9,6 @@
     <string name="facebook_share_description">Git Hub</string>
     <string name="user">Usuário:</string>
     <string name="search">Buscar</string>
+
+    <string name="no_users_found">Nenhum usuário encontrado</string>
 </resources>
