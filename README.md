@@ -6,10 +6,14 @@ Recursos:
 - Compartilhamento do usuário encontrado na TimeLine do Facebook.
 
 Listagem
+--------
 ![list](https://github.com/hlandim/GitUserSearch/blob/master/prints/list.png)
+
 Removendo
+--------
 ![list](https://github.com/hlandim/GitUserSearch/blob/master/prints/remove.png)
+
 Compartilhamento(Facebook)
-Listagem
+--------
 ![facebook_sharing](https://github.com/hlandim/GitUserSearch/blob/master/prints/facebook_share.png)
 
